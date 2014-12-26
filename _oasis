@@ -1,0 +1,27 @@
+OASISFormat: 0.3
+Name:        postgresql-simple
+Version:     0.1
+Synopsis:    OCaml bindings for PostgreSQL (simplified version)
+Authors:     Alexander Dinu
+License:     BSD-3-clause
+Plugins:     META (0.3), DevFiles (0.3)
+BuildTools:  ocamlbuild
+
+Library postgresql_simple
+  Path:         src
+  Findlibname:  postgresql_simple
+  Pack:         true
+  Modules:      Client
+  BuildDepends: threads, postgresql
+
+Executable test
+  Path:         test
+  BuildTools:   ocamlbuild
+  MainIs:       test.ml
+  BuildDepends: oUnit, postgresql_simple
+  Install:      false
+  Build$:       flag(tests)
+
+Test main
+  Run$:         flag(tests)
+  Command:      $test

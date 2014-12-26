@@ -1,0 +1,31 @@
+# OASIS_START
+# DO NOT EDIT (digest: bd76c4b9ca4be000bd3855bb8189fda5)
+# Ignore VCS directories, you can use the same kind of rule outside
+# OASIS_START/STOP if you want to exclude directories that contains
+# useless stuff for the build process
+true: annot, bin_annot
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
+# Library postgresql_simple
+"src/postgresql_simple.cmxs": use_postgresql_simple
+"src/client.cmx": for-pack(Postgresql_simple)
+<src/*.ml{,i,y}>: pkg_postgresql
+<src/*.ml{,i,y}>: pkg_threads
+# Executable test
+"test/test.byte": pkg_oUnit
+"test/test.byte": pkg_postgresql
+"test/test.byte": pkg_threads
+"test/test.byte": use_postgresql_simple
+<test/*.ml{,i,y}>: pkg_oUnit
+<test/*.ml{,i,y}>: pkg_postgresql
+<test/*.ml{,i,y}>: pkg_threads
+<test/*.ml{,i,y}>: use_postgresql_simple
+# OASIS_STOP
