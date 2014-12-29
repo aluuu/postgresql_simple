@@ -1,12 +1,24 @@
-type connection = Connected of Postgresql.connection
-                | Disconnected
+module Value: sig
+  type t = [ `Bool of bool
+           | `Int of int
+           | `String of string]
+  val of_string: Postgresql.ftype -> string -> t
+end
 
-type result = Tuples of string list list
-            | Error of string
-            | Ok
+module Result: sig
+  type t = Tuples of Value.t list list
+         | Error of string
+         | Ok
+  val fetch_tuples: Postgresql.result -> t
+end
 
-val connect: string -> connection
+module Connection: sig
+  type t = Connected of Postgresql.connection
+         | Disconnected
+end
 
-val execute: connection -> string -> result
+val connect: string -> Connection.t
 
-val disconnect: connection -> connection
+val execute: Connection.t -> string -> Result.t
+
+val disconnect: Connection.t -> Connection.t

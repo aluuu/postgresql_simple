@@ -44,7 +44,9 @@ let table_fixture test_case test_ctxt =
   let create_q = Printf.sprintf
                    "CREATE TABLE %s (id serial PRIMARY KEY,
                                      num integer,
-                                     data varchar);" table_name in
+                                     data varchar,
+                                     bool boolean
+                    );" table_name in
   let drop_q = Printf.sprintf "DROP TABLE %s;" table_name in
 
   let conn = setup () in
@@ -54,22 +56,33 @@ let table_fixture test_case test_ctxt =
   teardown conn
 
 let test_create_drop_table test_ctxt conn =
-  let res = execute conn "CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar);" in
+  let res = execute conn "CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar, bool boolean);" in
   assert_bool "Cannot CREATE table" (res = Ok);
   let res = execute conn "DROP TABLE test;" in
   assert_bool "Cannot DROP table" (res = Ok)
 
 let test_insertion test_ctxt conn table_name  =
-  let records = [(1, "qwe"); (2, "asd"); (3, "zxc")] in
-  let insert (num, data) =
-    let q = Printf.sprintf "INSERT INTO %s (num, data) VALUES (%d, '%s')" table_name num data in
+  let records = [(1, "qwe", "t"); (2, "asd", "f"); (3, "zxc", "t")] in
+  let insert (num, data, bool) =
+    let q = Printf.sprintf "INSERT INTO %s (num, data, bool) VALUES (%d, '%s', '%s')" table_name num data bool in
     match execute conn q with
     | Ok -> true
     | Error err -> failwith err
     | _ -> false
   in
   assert_bool "Not all records where inserted"
-              (List.map insert records = [true; true; true])
+              (List.map insert records = [true; true; true]);
+  let selected_records =
+    let q = Printf.sprintf "SELECT num, data, bool FROM %s ORDER BY num" table_name in
+    match execute conn q with
+    | Ok -> failwith "Unexpected Ok response"
+    | Error err -> failwith err
+    | Tuples l -> l
+  in
+  assert_bool "Records are not equal to expected"
+              (selected_records = [[`Int 1; `String "qwe"; `Bool true];
+                                   [`Int 2; `String "asd"; `Bool false];
+                                   [`Int 3; `String "zxc"; `Bool true]])
 
 let _ =
   let suite = "Postgresql_simple" >::: [
