@@ -50,34 +50,34 @@ let table_fixture test_case test_ctxt =
   let drop_q = Printf.sprintf "DROP TABLE %s;" table_name in
 
   let conn = setup () in
-  assert_bool "Cannot CREATE test table" (execute conn create_q = Ok);
+  assert_bool "Cannot CREATE test table" (execute conn create_q = Result.Ok);
   let _ = test_case test_ctxt conn table_name in
-  assert_bool "Cannot DROP test table" (execute conn drop_q = Ok);
+  assert_bool "Cannot DROP test table" (execute conn drop_q = Result.Ok);
   teardown conn
 
 let test_create_drop_table test_ctxt conn =
   let res = execute conn "CREATE TABLE test (id serial PRIMARY KEY, num integer, data varchar, bool boolean);" in
-  assert_bool "Cannot CREATE table" (res = Ok);
+  assert_bool "Cannot CREATE table" (res = Result.Ok);
   let res = execute conn "DROP TABLE test;" in
-  assert_bool "Cannot DROP table" (res = Ok)
+  assert_bool "Cannot DROP table" (res = Result.Ok)
 
 let test_insertion test_ctxt conn table_name  =
   let records = [(1, "qwe", "t"); (2, "asd", "f"); (3, "zxc", "t")] in
   let insert (num, data, bool) =
     let q = Printf.sprintf "INSERT INTO %s (num, data, bool) VALUES (%d, '%s', '%s')" table_name num data bool in
     match execute conn q with
-    | Ok -> true
-    | Error err -> failwith err
-    | _ -> false
+    | Result.Ok -> true
+    | Result.Error err -> failwith err
+    | Result.Tuples _ -> false
   in
   assert_bool "Not all records where inserted"
               (List.map insert records = [true; true; true]);
   let selected_records =
     let q = Printf.sprintf "SELECT num, data, bool FROM %s ORDER BY num" table_name in
     match execute conn q with
-    | Ok -> failwith "Unexpected Ok response"
-    | Error err -> failwith err
-    | Tuples l -> l
+    | Result.Ok -> failwith "Unexpected Ok response"
+    | Result.Error err -> failwith err
+    | Result.Tuples l -> l
   in
   assert_bool "Records are not equal to expected"
               (selected_records = [[`Int 1; `String "qwe"; `Bool true];
