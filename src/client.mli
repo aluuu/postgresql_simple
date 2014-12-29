@@ -1,7 +1,13 @@
 module Value: sig
   type t = [ `Bool of bool
            | `Int of int
-           | `String of string]
+           | `Float of float
+           | `String of string
+           | `Binary of string
+           | `Inet of string
+           | `Cidr of string
+           | `Macaddr of string
+           | `Void]
   val of_string: Postgresql.ftype -> string -> t
 end
 

@@ -1,14 +1,31 @@
 module Value = struct
   type t = [ `Bool of bool
            | `Int of int
-           | `String of string]
+           | `Float of float
+           | `String of string
+           | `Binary of string
+           | `Inet of string
+           | `Cidr of string
+           | `Macaddr of string
+           | `Void]
   let of_string ftype value =
     let open Postgresql in
     match ftype with
-    | INT2 | INT8 | INT4 -> `Int (int_of_string value)
     | BOOL -> `Bool (value = "t")
-    | TEXT| VARCHAR -> `String value
-    | _ -> failwith "not implemented"
+    | BYTEA -> `Binary value
+    | INET -> `Inet value
+    | CIDR -> `Cidr value
+    | MACADDR -> `Macaddr value
+    | VOID -> `Void
+    | FLOAT4
+    | FLOAT8 ->
+       `Float (match value with
+               | "Infinity" -> infinity
+               | "-Infinity" -> neg_infinity
+               | "NaN" -> nan
+               | _ -> float_of_string value)
+    | INT2 | INT8 | INT4 -> `Int (int_of_string value)
+    | TEXT| VARCHAR | CHAR | NAME | CSTRING | VARBIT -> `String value
 end
 
 module Result = struct
