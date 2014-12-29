@@ -14,6 +14,7 @@ esac
 echo "yes" | sudo add-apt-repository ppa:$ppa
 sudo apt-get update -qq
 sudo apt-get install -qq ocaml ocaml-native-compilers camlp4-extra opam
+sudo -u postgres createdb ocaml_psql_test
 export OPAMYES=1
 export OPAMVERBOSE=1
 echo OCaml version
@@ -26,4 +27,5 @@ opam install ${OPAM_DEPENDS}
 eval `opam config env`
 ocaml setup.ml -configure --enable-tests
 ocaml setup.ml -build
+export OCAML_PSQL_CONNINFO="host=127.0.0.1 port=5432 dbname=ocaml_psql_test user=postgres password="
 ocaml setup.ml -test
