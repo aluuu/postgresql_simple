@@ -62,27 +62,30 @@ let test_create_drop_table test_ctxt conn =
   assert_bool "Cannot DROP table" (res = Result.Ok)
 
 let test_insertion test_ctxt conn table_name  =
-  let records = [(1, "qwe", "t"); (2, "asd", "f"); (3, "zxc", "t")] in
+  let records = [("1", "NULL", "true");
+                 ("NULL", "'asd'", "false");
+                 ("3", "'NULL'", "true");
+                 ("4", "''", "true")] in
   let insert (num, data, bool) =
-    let q = Printf.sprintf "INSERT INTO %s (num, data, bool) VALUES (%d, '%s', '%s')" table_name num data bool in
+    let q = Printf.sprintf "INSERT INTO %s (num, data, bool) VALUES (%s, %s, %s)" table_name num data bool in
     match execute conn q with
     | Result.Ok -> true
     | Result.Error err -> failwith err
     | Result.Tuples _ -> false
   in
   assert_bool "Not all records where inserted"
-              (List.map insert records = [true; true; true]);
+              (List.map insert records = [true; true; true; true]);
   let selected_records =
-    let q = Printf.sprintf "SELECT num, data, bool FROM %s ORDER BY num" table_name in
+    let q = Printf.sprintf "SELECT num, data, bool FROM %s ORDER BY id" table_name in
     match execute conn q with
     | Result.Ok -> failwith "Unexpected Ok response"
     | Result.Error err -> failwith err
     | Result.Tuples l -> l
   in
-  assert_bool "Records are not equal to expected"
-              (selected_records = [[`Int 1; `String "qwe"; `Bool true];
-                                   [`Int 2; `String "asd"; `Bool false];
-                                   [`Int 3; `String "zxc"; `Bool true]])
+  assert_bool "Row 1 is not expected" (List.nth selected_records 0 = [`Int 1; `NULL; `Bool true]);
+  assert_bool "Row 2 is not expected" (List.nth selected_records 1 = [`NULL; `String "asd"; `Bool false]);
+  assert_bool "Row 3 is not expected" (List.nth selected_records 2 = [`Int 3; `String "NULL"; `Bool true]);
+  assert_bool "Row 4 is not expected" (List.nth selected_records 3 = [`Int 4; `String ""; `Bool true])
 
 let _ =
   let suite = "Postgresql_simple" >::: [

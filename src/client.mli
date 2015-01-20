@@ -7,7 +7,9 @@ module Value: sig
            | `Inet of string
            | `Cidr of string
            | `Macaddr of string
-           | `Void]
+           | `Void
+           | `NULL]
+
   val of_string: Postgresql.ftype -> string -> t
 end
 

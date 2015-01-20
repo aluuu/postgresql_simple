@@ -7,7 +7,9 @@ module Value = struct
            | `Inet of string
            | `Cidr of string
            | `Macaddr of string
-           | `Void]
+           | `Void
+           | `NULL]
+
   let of_string ftype value =
     let open Postgresql in
     match ftype with
@@ -25,7 +27,8 @@ module Value = struct
                | "NaN" -> nan
                | _ -> float_of_string value)
     | INT2 | INT8 | INT4 -> `Int (int_of_string value)
-    | TEXT| VARCHAR | CHAR | NAME | CSTRING | VARBIT -> `String value
+    | TEXT| VARCHAR | CHAR
+    | NAME | CSTRING | VARBIT -> `String value
 end
 
 module Result = struct
@@ -40,8 +43,11 @@ module Result = struct
       let tpl_ref = ref [] in
       for i = nfields - 1 downto 0 do
         let ftype = result#ftype i in
-        let value = result#getvalue t i in
-        tpl_ref := Value.of_string ftype value :: !tpl_ref
+        if result#getisnull t i then
+          tpl_ref := `NULL :: !tpl_ref
+        else
+          let value = result#getvalue t i in
+          tpl_ref := Value.of_string ftype value :: !tpl_ref
       done;
       lst_ref := !tpl_ref :: !lst_ref
     done;
