@@ -1,3 +1,5 @@
+let todo s = failwith (Printf.sprintf "TODO: %s\n" s)
+
 module Value = struct
   type t = [ `Bool of bool
            | `Int of int
@@ -7,7 +9,7 @@ module Value = struct
            | `Inet of string
            | `Cidr of string
            | `Macaddr of string
-           | `Void
+           | `Point of (float * float)
            | `NULL]
 
   let of_string ftype value =
@@ -18,7 +20,6 @@ module Value = struct
     | INET -> `Inet value
     | CIDR -> `Cidr value
     | MACADDR -> `Macaddr value
-    | VOID -> `Void
     | FLOAT4
     | FLOAT8 ->
        `Float (match value with
@@ -29,6 +30,11 @@ module Value = struct
     | INT2 | INT8 | INT4 -> `Int (int_of_string value)
     | TEXT| VARCHAR | CHAR
     | NAME | CSTRING | VARBIT -> `String value
+    | POINT ->
+       let value = Re_str.global_replace (Re_str.regexp "(\|)") "" value in
+       (match Re_str.split (Re_str.regexp ",") value with
+        | x :: y :: [] -> `Point (float_of_string x, float_of_string y)
+        | _ -> todo "handle malformed point values (if their appearance is possible)")
 end
 
 module Result = struct

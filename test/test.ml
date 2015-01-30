@@ -61,11 +61,12 @@ let test_create_drop_table test_ctxt conn =
   let res = execute conn "DROP TABLE test;" in
   assert_bool "Cannot DROP table" (res = Result.Ok)
 
-let test_insertion test_ctxt conn table_name  =
+let test_null_values test_ctxt conn table_name  =
   let records = [("1", "NULL", "true");
                  ("NULL", "'asd'", "false");
                  ("3", "'NULL'", "true");
                  ("4", "''", "true")] in
+
   let insert (num, data, bool) =
     let q = Printf.sprintf "INSERT INTO %s (num, data, bool) VALUES (%s, %s, %s)" table_name num data bool in
     match execute conn q with
@@ -75,6 +76,7 @@ let test_insertion test_ctxt conn table_name  =
   in
   assert_bool "Not all records where inserted"
               (List.map insert records = [true; true; true; true]);
+
   let selected_records =
     let q = Printf.sprintf "SELECT num, data, bool FROM %s ORDER BY id" table_name in
     match execute conn q with
@@ -87,9 +89,17 @@ let test_insertion test_ctxt conn table_name  =
   assert_bool "Row 3 is not expected" (List.nth selected_records 2 = [`Int 3; `String "NULL"; `Bool true]);
   assert_bool "Row 4 is not expected" (List.nth selected_records 3 = [`Int 4; `String ""; `Bool true])
 
+let test_point test_ctxt conn =
+  let q = "SELECT '(1,2)'::point;" in
+  match execute conn q with
+  | Result.Ok -> failwith "Unexpected Ok response"
+  | Result.Error err -> failwith err
+  | Result.Tuples l -> assert_bool "Wrong point" (l = [[`Point (1.0, 2.0)]])
+
 let _ =
   let suite = "Postgresql_simple" >::: [
     "test_create_drop_table" >:: (db_fixture test_create_drop_table);
-    "test_insertion" >:: (table_fixture test_insertion);
+    "test_null_values" >:: (table_fixture test_null_values);
+    "test_point" >:: (db_fixture test_point);
   ] in
   run_test_tt_main suite
