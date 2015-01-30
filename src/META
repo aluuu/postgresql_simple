@@ -1,8 +1,8 @@
 # OASIS_START
-# DO NOT EDIT (digest: 51e86e449d906e4ce59064dcc8dd5f28)
+# DO NOT EDIT (digest: 00853b47478c16f4ec1ea52475c20af3)
 version = "0.1"
 description = "OCaml bindings for PostgreSQL (simplified version)"
-requires = "threads postgresql"
+requires = "threads re.str postgresql"
 archive(byte) = "postgresql_simple.cma"
 archive(byte, plugin) = "postgresql_simple.cma"
 archive(native) = "postgresql_simple.cmxa"

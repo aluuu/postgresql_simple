@@ -12,7 +12,7 @@ Library postgresql_simple
   Findlibname:  postgresql_simple
   Pack:         true
   Modules:      Client
-  BuildDepends: threads, postgresql
+  BuildDepends: threads, re.str, postgresql
 
 Executable test
   Path:         test
