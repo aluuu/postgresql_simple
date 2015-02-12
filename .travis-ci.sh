@@ -1,4 +1,4 @@
-OPAM_DEPENDS="postgresql oUnit"
+OPAM_DEPENDS="postgresql oUnit re"
 case "$OCAML_VERSION,$OPAM_VERSION" in
 4.00.1,1.0.0) ppa=avsm/ocaml40+opam10 ;;
 4.00.1,1.1.0) ppa=avsm/ocaml40+opam11 ;;
